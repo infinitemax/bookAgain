@@ -5,15 +5,19 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	health2 "github.com/infinitemax/bookAgain/internal/health"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"net/http"
 )
 
 type Server struct {
+	pool *pgxpool.Pool
 }
 
-func (s *Server) StartServer() {
+func (s *Server) StartServer(pool *pgxpool.Pool) {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+
+	s.pool = pool
 
 	s.SetupHandlers(r)
 

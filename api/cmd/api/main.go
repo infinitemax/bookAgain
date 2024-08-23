@@ -30,6 +30,6 @@ func main() {
 
 	s := &server.Server{}
 
-	s.StartServer()
+	s.StartServer(connPool)
 
 }
