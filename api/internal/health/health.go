@@ -10,5 +10,9 @@ func NewHandler() *Handler {
 }
 
 func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Doing fine!"))
+	_, err := w.Write([]byte("Doing fine!"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }

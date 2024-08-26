@@ -1,7 +1,11 @@
 package users
 
+import (
+	"context"
+)
+
 type IUserService interface {
-	CreateUser() error
+	GetUsers(ctx context.Context) ([]*User, error)
 }
 
 type Service struct {
@@ -14,10 +18,7 @@ func NewService(db IUserService) *Service {
 	}
 }
 
-func (s *Service) CreateUser() error {
-	err := s.db.CreateUser()
-	if err != nil {
-		return err
-	}
-	return nil
+func (s *Service) GetUsers(ctx context.Context) ([]*User, error) {
+
+	return s.db.GetUsers(ctx)
 }

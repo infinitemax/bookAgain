@@ -1,18 +1,30 @@
 package users
 
-import "github.com/jackc/pgx/v5/pgxpool"
+import (
+	"context"
+	"log"
+)
 
-type Db struct {
-	pool pgxpool.Pool
-}
+func (db *Db) GetUsers(ctx context.Context) ([]*User, error) {
 
-func NewDb(pool pgxpool.Pool) *Db {
-	return &Db{
-		pool: pool,
+	sql := `select * from books.users where deleted_at is null`
+
+	rows, err := db.pool.Query(ctx, sql)
+	if err != nil {
+		return nil, err
 	}
-}
+	defer rows.Close()
 
-func (db *Db) CreateUser() error {
+	var usersSlice []*User
 
-	return nil
+	for rows.Next() {
+		var u User
+		err := rows.Scan(&u.Id, &u.UserName, &u.Email, &u.CreatedAt, &u.DeletedAt)
+		if err != nil {
+			log.Fatal(err)
+		}
+		usersSlice = append(usersSlice, &u)
+	}
+
+	return usersSlice, nil
 }

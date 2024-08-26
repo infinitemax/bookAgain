@@ -6,10 +6,16 @@ import (
 	"github.com/infinitemax/bookAgain/db/config"
 	"github.com/infinitemax/bookAgain/internal/server"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/joho/godotenv"
 	"log"
 )
 
 func main() {
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
 	connPool, err := pgxpool.NewWithConfig(context.Background(), config.Config())
 	if err != nil {
