@@ -1,39 +1,40 @@
 package server
 
 import (
-	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	health2 "github.com/infinitemax/bookAgain/internal/health"
-	"net/http"
+	"github.com/infinitemax/bookAgain/internal/books"
+	"github.com/infinitemax/bookAgain/internal/health"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Server struct {
+	Client *mongo.Client
+	Deps   *dependencies
 }
 
-func (s *Server) StartServer() {
-	r := chi.NewRouter()
+type dependencies struct {
+	booksService *books.Service
+}
+
+func (s *Server) SetupDependencies() error {
+	s.Deps = &dependencies{}
+
+	booksService := books.NewService()
+	s.Deps.booksService = booksService
+
+	return nil
+}
+
+func (s *Server) SetupHandlers(r chi.Router) error {
 	r.Use(middleware.Logger)
 
-	s.SetupHandlers(r)
-
-	err := http.ListenAndServe(":1234", r)
+	err := s.SetupDependencies()
 	if err != nil {
-		fmt.Println("Fuck, the server isn't working!")
+		return err
 	}
+	health.NewHandler(r)
 
-	fmt.Println("listening on 1234")
-
-}
-
-func (s *Server) SetupHandlers(r chi.Router) {
-
-	health := health2.NewHandler()
-
-	r.Route("/api/v1", func(r chi.Router) {
-		r.Route("/health", func(r chi.Router) {
-			r.Get("/", health.HealthCheck)
-		})
-	})
-
+	books.NewHandler(r, s.Deps.booksService, s.Client)
+	return nil
 }
